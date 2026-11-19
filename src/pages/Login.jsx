@@ -12,7 +12,7 @@ export default function Login() {
     e.preventDefault()
     setOcupado(true); setMsg(null)
     const datos = { email: email.trim().toLowerCase(), password: clave }
-    const { error } = modo === 'entrar'
+    const { data, error } = modo === 'entrar'
       ? await supabase.auth.signInWithPassword(datos)
       : await supabase.auth.signUp({ ...datos, options: { emailRedirectTo: window.location.origin } })
     setOcupado(false)
@@ -22,7 +22,7 @@ export default function Login() {
         : t.includes('not confirmed') ? 'Primero confirma tu correo con el enlace que te enviamos.'
         : t.includes('acceso') || t.includes('Database error') ? 'Este correo no tiene acceso a la app de la boda.'
         : t })
-    } else if (modo === 'crear') {
+    } else if (modo === 'crear' && !data?.session) {
       setMsg({ t: 'Listo. Revisa tu correo, toca el enlace de confirmación y vuelve aquí para entrar.' })
       setModo('entrar')
     }
