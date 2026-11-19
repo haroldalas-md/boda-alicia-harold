@@ -82,6 +82,7 @@ const ICONOS = {
   tareas: 'M9 11l3 3 8-8M4 12a8 8 0 1 0 8-8',
   dinero: 'M3 7h18v12H3zM3 11h18M7 15h3',
   invitados: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6M22 21a6 6 0 0 0-4-5.6',
+  avisos: 'M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9zM10 20a2 2 0 0 0 4 0',
 }
 export function Icono({ nombre }) {
   return (

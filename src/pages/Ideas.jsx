@@ -72,8 +72,10 @@ function NuevaIdea({ abierto, onCerrar }) {
   const [categoria, setCategoria] = useState(null)
   const [imagen, setImagen] = useState(null) // { path } o { file, preview }
   const [estado, setEstado] = useState(null)
+  const [pedir, setPedir] = useState(true)
+  const otro = d.yo === 'Alicia' ? 'Harold' : 'Alicia'
 
-  const limpiar = () => { setEnlace(''); setTitulo(''); setCategoria(null); setImagen(null); setEstado(null) }
+  const limpiar = () => { setEnlace(''); setTitulo(''); setCategoria(null); setImagen(null); setEstado(null); setPedir(true) }
   const cerrar = () => { limpiar(); onCerrar() }
 
   async function traer(url) {
@@ -120,6 +122,7 @@ function NuevaIdea({ abierto, onCerrar }) {
         imagen_path,
         categoria_id: categoria,
         creada_por: d.yo,
+        opinion_de: pedir ? otro : null,
         [d.yo === 'Alicia' ? 'gusta_alicia' : 'gusta_harold']: true,
       })
       cerrar()
@@ -156,6 +159,9 @@ function NuevaIdea({ abierto, onCerrar }) {
       <Campo label="Categoría">
         <SelectCategoria categorias={d.categorias} valor={categoria} onCambio={setCategoria} />
       </Campo>
+      <label className="interruptor">
+        <input type="checkbox" checked={pedir} onChange={(e) => setPedir(e.target.checked)} /> Pedirle a {otro} que me diga si le gusta
+      </label>
       <button className="btn grande" onClick={guardar} disabled={estado?.t === 'Guardando…'}>Guardar idea</button>
     </Sheet>
   )
@@ -196,6 +202,18 @@ function DetalleIdea({ idea, onCerrar }) {
           onClick={() => d.editar('ideas', idea.id, { gusta_harold: !idea.gusta_harold })}>💙 Harold</button>
       </div>
       <p className="ayuda centro-texto">Toca tu corazón si te gusta ({d.yo}).</p>
+      {idea.opinion_de === d.yo && (
+        <div className="acciones">
+          <button className="btn" onClick={() => d.editar('ideas', idea.id, { [miCampo]: true, opinion_de: null })}>❤️ Me gusta</button>
+          <button className="btn secundario" onClick={() => d.editar('ideas', idea.id, { [miCampo]: false, opinion_de: null })}>🤔 No me convence</button>
+        </div>
+      )}
+      {idea.opinion_de && idea.opinion_de !== d.yo && <p className="aviso">Esperando la opinión de {idea.opinion_de} 💭</p>}
+      {!idea.opinion_de && (
+        <button className="enlace" onClick={() => d.editar('ideas', idea.id, { opinion_de: d.yo === 'Alicia' ? 'Harold' : 'Alicia' })}>
+          💭 Pedirle a {d.yo === 'Alicia' ? 'Harold' : 'Alicia'} su opinión
+        </button>
+      )}
 
       <Chips valor={idea.estado} onCambio={(v) => d.editar('ideas', idea.id, { estado: v })}
         opciones={Object.entries(ESTADOS_IDEA).map(([valor, e]) => ({ valor, label: e.label }))} />

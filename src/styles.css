@@ -298,3 +298,24 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--celeste); b
 .leyenda-mini i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; background: var(--celeste-suave); vertical-align: -1px; }
 .leyenda-mini i.pagado { background: var(--azul); }
 .leyenda-mini i.contratado { background: #B9DAF0; }
+
+/* Menú con 6 pestañas y contador */
+.nav button { font-size: .66rem; }
+.nav-icono { position: relative; display: inline-flex; }
+.contador-rojo { position: absolute; top: -5px; right: -9px; background: #E5484D; color: #fff; font-size: .62rem; min-width: 17px; height: 17px;
+  border-radius: 99px; display: grid; place-items: center; padding: 0 4px; border: 2px solid #fff; }
+/* Avisos */
+.avisos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.aviso-item { width: 100%; border: 0; background: #fff; border-radius: 14px; padding: 12px; box-shadow: var(--sombra); display: flex; gap: 12px; align-items: flex-start; text-align: left; }
+.aviso-item.nuevo { background: var(--celeste-suave); }
+.aviso-item.mio { opacity: .75; }
+.aviso-item p { margin: 0; font-weight: 600; }
+.aviso-item > div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.aviso-item small { color: var(--gris); font-size: .75rem; }
+.aviso-icono { font-size: 1.3rem; }
+.punto-nuevo { width: 9px; height: 9px; border-radius: 50%; background: var(--azul); margin-top: 6px; flex: none; }
+.tarjeta.opinion { background: #FFF9FB; }
+.opinion-item { display: flex; gap: 12px; align-items: flex-start; }
+.opinion-img { width: 76px; height: 96px; object-fit: cover; border-radius: 10px; flex: none; }
+.opinion-cuerpo { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.opinion-cuerpo .acciones .btn { padding: 10px 8px; font-size: .88rem; }

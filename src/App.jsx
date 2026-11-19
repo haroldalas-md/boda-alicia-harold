@@ -9,6 +9,7 @@ import Tareas from './pages/Tareas'
 import Dinero from './pages/Dinero'
 import Invitados from './pages/Invitados'
 import Invitacion from './pages/Invitacion'
+import Avisos, { contarAvisos } from './pages/Avisos'
 
 const PESTANAS = [
   { id: 'inicio', label: 'Inicio', C: Inicio },
@@ -16,6 +17,7 @@ const PESTANAS = [
   { id: 'tareas', label: 'Tareas', C: Tareas },
   { id: 'dinero', label: 'Dinero', C: Dinero },
   { id: 'invitados', label: 'Invitados', C: Invitados },
+  { id: 'avisos', label: 'Avisos', C: Avisos },
 ]
 
 function usePestana() {
@@ -32,7 +34,9 @@ function usePestana() {
 
 function Contenido() {
   const [pestana, ir] = usePestana()
-  const { cargando, error } = useDatos()
+  const datos = useDatos()
+  const { cargando, error } = datos
+  const avisos = cargando ? 0 : contarAvisos(datos)
   const Actual = (PESTANAS.find((x) => x.id === pestana) || PESTANAS[0]).C
   return (
     <>
@@ -43,7 +47,10 @@ function Contenido() {
       <nav className="nav">
         {PESTANAS.map((x) => (
           <button key={x.id} className={pestana === x.id ? 'activo' : ''} onClick={() => ir(x.id)}>
-            <Icono nombre={x.id} />
+            <span className="nav-icono">
+              <Icono nombre={x.id} />
+              {x.id === 'avisos' && avisos > 0 && pestana !== 'avisos' && <b className="contador-rojo">{avisos > 9 ? '9+' : avisos}</b>}
+            </span>
             <span>{x.label}</span>
           </button>
         ))}

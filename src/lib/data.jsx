@@ -10,6 +10,8 @@ const TABLAS = {
   ahorro_movimientos: { order: 'fecha', ascending: false },
   invitados: { order: 'nombre', ascending: true },
   ajustes: { order: 'clave', ascending: true },
+  actividad: { order: 'updated_at', ascending: false, limit: 80 },
+  actividad_vista: { order: 'nombre', ascending: true },
 }
 
 const Ctx = createContext(null)
@@ -20,8 +22,10 @@ export function DataProvider({ yo, children }) {
   const [error, setError] = useState(null)
 
   const cargar = useCallback(async (tabla) => {
-    const { order, ascending } = TABLAS[tabla]
-    const { data, error } = await supabase.from(tabla).select('*').order(order, { ascending, nullsFirst: false })
+    const { order, ascending, limit } = TABLAS[tabla]
+    let q = supabase.from(tabla).select('*').order(order, { ascending, nullsFirst: false })
+    if (limit) q = q.limit(limit)
+    const { data, error } = await q
     if (error) { setError(error.message); return }
     setDatos((d) => ({ ...d, [tabla]: data }))
   }, [])
