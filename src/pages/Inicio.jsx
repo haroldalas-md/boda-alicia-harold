@@ -1,7 +1,41 @@
 import { useDatos, resumenDinero } from '../lib/data'
 import { FECHA_BODA, diasHasta, dinero, fechaCorta, hoyISO, mesesHasta } from '../lib/format'
+import { useEffect, useState } from 'react'
 import { Barra, Img } from '../components/ui'
 import { supabase } from '../lib/supabase'
+import { subirArchivo } from '../lib/files'
+
+function Portada() {
+  const [path, setPath] = useState(null)
+  const [cargando, setCargando] = useState(true)
+  const [subiendo, setSubiendo] = useState(false)
+  useEffect(() => {
+    supabase.from('ajustes').select('valor').eq('clave', 'portada').maybeSingle()
+      .then(({ data }) => { setPath(data?.valor || null); setCargando(false) })
+  }, [])
+  async function cambiar(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setSubiendo(true)
+    try {
+      const nuevo = await subirArchivo(file, 'portada')
+      await supabase.from('ajustes').upsert({ clave: 'portada', valor: nuevo, updated_at: new Date().toISOString() })
+      if (path) await supabase.storage.from('boda').remove([path])
+      setPath(nuevo)
+    } catch (err) { alert('No se pudo subir la foto: ' + err.message) }
+    setSubiendo(false)
+  }
+  if (cargando) return <div className="portada vacia" />
+  return (
+    <div className={`portada ${path ? '' : 'vacia'}`}>
+      {path && <Img path={path} alt="Alicia y Harold" />}
+      <label className="portada-boton">
+        {subiendo ? 'Subiendo…' : path ? '📷' : '📷 Agregar foto de portada'}
+        <input type="file" accept="image/*" hidden onChange={cambiar} />
+      </label>
+    </div>
+  )
+}
 
 export default function Inicio({ ir }) {
   const d = useDatos()
@@ -19,6 +53,7 @@ export default function Inicio({ ir }) {
   return (
     <div className="pagina">
       <header className="hero">
+        <Portada />
         <p className="saludo">Hola, {d.yo} 💙</p>
         <div className="cuenta">
           <span className="num">{dias}</span>

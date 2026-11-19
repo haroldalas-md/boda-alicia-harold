@@ -193,3 +193,13 @@ alter publication supabase_realtime add table
 revoke execute on function public.bloquear_no_miembros() from public, anon, authenticated;
 revoke execute on function public.es_miembro() from public, anon;
 grant execute on function public.es_miembro() to authenticated;
+
+-- 003: ajustes (foto de portada, etc.)
+create table public.ajustes (
+  clave text primary key,
+  valor text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.ajustes enable row level security;
+create policy "solo miembros" on public.ajustes for all to authenticated
+  using ((select public.es_miembro())) with check ((select public.es_miembro()));
