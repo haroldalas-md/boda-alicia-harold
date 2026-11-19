@@ -9,6 +9,7 @@ const TABLAS = {
   pagos: { order: 'fecha', ascending: false },
   ahorro_movimientos: { order: 'fecha', ascending: false },
   invitados: { order: 'nombre', ascending: true },
+  ajustes: { order: 'clave', ascending: true },
 }
 
 const Ctx = createContext(null)

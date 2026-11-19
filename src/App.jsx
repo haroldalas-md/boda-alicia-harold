@@ -8,6 +8,7 @@ import Ideas from './pages/Ideas'
 import Tareas from './pages/Tareas'
 import Dinero from './pages/Dinero'
 import Invitados from './pages/Invitados'
+import Invitacion from './pages/Invitacion'
 
 const PESTANAS = [
   { id: 'inicio', label: 'Inicio', C: Inicio },
@@ -52,6 +53,12 @@ function Contenido() {
 }
 
 export default function App() {
+  const ruta = window.location.pathname.match(/^\/i\/([0-9a-f-]{36})\/?$/i)
+  if (ruta) return configurado ? <Invitacion token={ruta[1]} /> : null
+  return <AppPrivada />
+}
+
+function AppPrivada() {
   const [sesion, setSesion] = useState(undefined)
   const [yo, setYo] = useState(null)
   const [sinAcceso, setSinAcceso] = useState(false)
