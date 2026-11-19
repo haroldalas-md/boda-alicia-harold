@@ -263,3 +263,29 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--celeste); b
 
 .invitacion-box .btn.secundario, .invitacion-box .pill { background: #fff; }
 .inv-tarjeta > p:not(.ayuda) { text-align: center; }
+
+/* Versículo y mensaje */
+.versiculo { text-align: center; align-items: center; background: linear-gradient(180deg, #fff, var(--celeste-suave)); }
+.v-texto { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.35rem; line-height: 1.35; color: var(--azul-osc); margin: 0; }
+.v-cita { margin: 0; font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--azul); font-weight: 700; }
+.v-amor { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--linea); width: 100%; }
+.v-amor p { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; color: var(--azul-osc); }
+.v-amor span { display: block; margin-top: 6px; color: var(--azul); font-weight: 700; font-size: .9rem; }
+/* Tarjeta suave para Alicia */
+.tarjeta.suave { background: #FFF9FB; }
+.pasitos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pasitos li { display: flex; gap: 10px; align-items: flex-start; }
+.pasitos .punto { width: 10px; height: 10px; border-radius: 50%; background: #E8B4C4; margin-top: 6px; flex: none; }
+.pasitos li div { display: flex; flex-direction: column; }
+.pasitos small { color: var(--gris); }
+/* Dona de dinero */
+.dona-caja { display: flex; align-items: center; gap: 14px; }
+.dona { width: 150px; height: 150px; flex: none; }
+.dona-num { font-size: 30px; font-weight: 700; fill: var(--azul-osc); font-family: 'Nunito Sans', sans-serif; }
+.dona-sub { font-size: 13px; fill: var(--gris); font-family: 'Nunito Sans', sans-serif; }
+.leyenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.leyenda li { display: flex; gap: 8px; align-items: flex-start; }
+.leyenda i { width: 12px; height: 12px; border-radius: 4px; margin-top: 4px; flex: none; }
+.leyenda div { display: flex; flex-direction: column; font-size: .85rem; color: var(--gris); }
+.leyenda b { font-size: 1.05rem; color: var(--tinta); }
+.barra-apilada { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: #E3EBF2; }

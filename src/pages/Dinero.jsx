@@ -40,26 +40,62 @@ export default function Dinero() {
   )
 }
 
+function Dona({ partes, total, centro, sub }) {
+  const R = 70, C = 2 * Math.PI * R
+  let acumulado = 0
+  return (
+    <svg viewBox="0 0 180 180" className="dona" role="img" aria-label={`${centro} ${sub}`}>
+      <circle cx="90" cy="90" r={R} fill="none" stroke="#E3EBF2" strokeWidth="22" />
+      {partes.filter((p) => p.valor > 0).map((p) => {
+        const largo = total > 0 ? (p.valor / total) * C : 0
+        const el = (
+          <circle key={p.label} cx="90" cy="90" r={R} fill="none" stroke={p.color} strokeWidth="22"
+            strokeDasharray={`${largo} ${C - largo}`} strokeDashoffset={-acumulado} transform="rotate(-90 90 90)" />
+        )
+        acumulado += largo
+        return el
+      })}
+      <text x="90" y="88" textAnchor="middle" className="dona-num">{centro}</text>
+      <text x="90" y="110" textAnchor="middle" className="dona-sub">{sub}</text>
+    </svg>
+  )
+}
+
 function Resumen({ r }) {
-  const falta = Math.max(0, r.falta - r.saldoAhorro)
-  const meses = mesesHasta(r.proximo?.fecha_limite)
+  const cubierto = Math.min(Math.max(r.saldoAhorro, 0), r.falta)
+  const porJuntar = Math.max(0, r.falta - cubierto)
+  const pct = r.comprometido > 0 ? Math.round((r.pagado / r.comprometido) * 100) : 0
+  const partes = [
+    { label: 'Ya pagado', valor: r.pagado, color: '#3E86C1' },
+    { label: 'Cubierto con el ahorro', valor: cubierto, color: '#8EC5E8' },
+    { label: 'Falta por juntar', valor: porJuntar, color: '#E8B4C4' },
+  ]
   const totalAportes = r.porOrigen.Harold + r.porOrigen.Alicia + r.abonos
   return (
     <>
+      <div className="tarjeta">
+        <div className="fila-entre"><h3>Lo contratado</h3><b className="azul-txt">{dinero(r.comprometido)}</b></div>
+        <div className="dona-caja">
+          <Dona partes={partes} total={r.comprometido} centro={`${pct}%`} sub="pagado" />
+          <ul className="leyenda">
+            {partes.map((p) => (
+              <li key={p.label}>
+                <i style={{ background: p.color }} />
+                <div><span>{p.label}</span><b>{dinero(p.valor)}</b></div>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="barra-apilada" aria-hidden="true">
+          {partes.filter((p) => p.valor > 0).map((p) => (
+            <div key={p.label} style={{ width: `${(p.valor / Math.max(1, r.comprometido)) * 100}%`, background: p.color }} />
+          ))}
+        </div>
+        <div className="fila-entre meta"><span>Pagado {dinero(r.pagado)}</span><span>Por pagar {dinero(r.falta)}</span></div>
+      </div>
       <div className="grid-stats">
         <div className="stat azul"><span>En el ahorro</span><b>{dinero(r.saldoAhorro)}</b></div>
-        <div className="stat"><span>Comprometido</span><b>{dinero(r.comprometido)}</b></div>
-        <div className="stat"><span>Ya pagado</span><b>{dinero(r.pagado)}</b></div>
-        <div className="stat"><span>Falta pagar</span><b>{dinero(r.falta)}</b></div>
-      </div>
-      <div className="tarjeta">
-        <h3>Meta de ahorro</h3>
-        {falta > 0 ? (
-          <p>Para cubrir lo que falta ({dinero(r.falta)} − {dinero(r.saldoAhorro)} ya ahorrados) necesitan
-            juntar <b>{dinero(Math.ceil(falta / meses))} al mes</b> durante {meses} {meses === 1 ? 'mes' : 'meses'}
-            {' '}(≈ {dinero(Math.ceil(falta / meses / 2))} cada uno).</p>
-        ) : <p>🎉 Con el ahorro actual ya cubren todo lo contratado.</p>}
-        <p className="ayuda">Solo cuenta proveedores contratados. Al agregar más, la meta se recalcula sola.</p>
+        <div className="stat"><span>Falta por juntar</span><b>{dinero(porJuntar)}</b></div>
       </div>
       {r.pendientes.length > 0 && (
         <div className="tarjeta">
