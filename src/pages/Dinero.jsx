@@ -133,9 +133,7 @@ function Proveedores({ r, abrir }) {
 }
 
 function Presupuesto({ r }) {
-  const d = useDatos()
-  const [editando, setEditando] = useState(null)
-  const [valor, setValor] = useState('')
+  const [editando, setEditando] = useState(null) // id | 'nueva'
   const totalComp = r.porCategoria.reduce((s, c) => s + c.comprometido, 0)
   return (
     <>
@@ -143,30 +141,107 @@ function Presupuesto({ r }) {
         <div className="fila-entre"><span>Presupuesto total</span><b>{dinero(r.presupuestoTotal)}</b></div>
         <div className="fila-entre"><span>Contratado</span><b>{dinero(totalComp)}</b></div>
         <Barra valor={totalComp} total={r.presupuestoTotal} alerta={totalComp > r.presupuestoTotal} />
-        <p className="ayuda">Es una propuesta inicial: toca cualquier monto para cambiarlo.</p>
+        <p className="ayuda">Toca una sección para cambiar su nombre, ícono o monto, moverla o borrarla.</p>
       </div>
       <ul className="lista">
         {r.porCategoria.map((c) => (
-          <li key={c.id} className="cat">
-            <div className="fila-entre">
-              <span>{c.emoji} {c.nombre}</span>
-              {editando === c.id ? (
-                <input className="monto-input" type="number" inputMode="decimal" autoFocus value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  onBlur={async () => { await d.editar('categorias', c.id, { presupuesto: Number(valor) || 0 }); setEditando(null) }} />
-              ) : (
-                <button className="enlace" onClick={() => { setEditando(c.id); setValor(String(c.presupuesto)) }}>{dinero(c.presupuesto)}</button>
-              )}
-            </div>
-            <Barra valor={c.comprometido} total={Number(c.presupuesto)} alerta={c.excedido} />
-            <div className="meta">
-              {c.comprometido > 0 ? <>Contratado {dinero(c.comprometido)} · pagado {dinero(c.pagado)}</> : 'Sin contratar'}
-              {c.excedido && <b className="rojo"> · se pasa por {dinero(c.comprometido - c.presupuesto)}</b>}
-            </div>
+          <li key={c.id}>
+            <button className="cat cat-boton" onClick={() => setEditando(c.id)}>
+              <div className="fila-entre">
+                <span>{c.emoji} {c.nombre}</span>
+                <b className="azul-txt">{dinero(c.presupuesto)}</b>
+              </div>
+              <Barra valor={c.comprometido} total={Number(c.presupuesto)} alerta={c.excedido} />
+              <div className="meta">
+                {c.comprometido > 0 ? <>Contratado {dinero(c.comprometido)} · pagado {dinero(c.pagado)}</> : 'Sin contratar'}
+                {c.excedido && <b className="rojo"> · se pasa por {dinero(c.comprometido - c.presupuesto)}</b>}
+              </div>
+            </button>
           </li>
         ))}
       </ul>
+      <button className="btn secundario" onClick={() => setEditando('nueva')}>＋ Nueva sección</button>
+      {editando && <EditarCategoria id={editando} onCerrar={() => setEditando(null)} />}
     </>
+  )
+}
+
+const EMOJIS = ['✨', '🏛️', '🍽️', '🎂', '🥂', '📸', '💍', '💃', '🤵', '🌺', '🎵', '✉️', '💇', '✝️', '🪑', '🚗', '🎁', '🌙', '🏨', '🛡️', '💡', '🎉', '🧁', '☕']
+
+function EditarCategoria({ id, onCerrar }) {
+  const d = useDatos()
+  const original = id === 'nueva' ? null : d.categorias.find((c) => c.id === id)
+  const [f, setF] = useState(() => ({
+    nombre: original?.nombre || '', emoji: original?.emoji || '✨', presupuesto: original ? String(original.presupuesto) : '',
+  }))
+  const [error, setError] = useState(null)
+  const set = (k) => (v) => setF((x) => ({ ...x, [k]: v }))
+  const usos = original ? {
+    proveedores: d.proveedores.filter((p) => p.categoria_id === id).length,
+    tareas: d.tareas.filter((t) => t.categoria_id === id).length,
+    ideas: d.ideas.filter((i) => i.categoria_id === id).length,
+  } : null
+  const lista = d.categorias
+  const pos = original ? lista.findIndex((c) => c.id === id) : -1
+
+  async function guardar() {
+    if (!f.nombre.trim()) return setError('Escribe el nombre de la sección')
+    const fila = { nombre: f.nombre.trim(), emoji: f.emoji, presupuesto: Number(f.presupuesto) || 0 }
+    try {
+      if (original) await d.editar('categorias', original.id, fila)
+      else await d.crear('categorias', { ...fila, orden: Math.max(0, ...lista.map((c) => c.orden)) + 1 })
+      onCerrar()
+    } catch (e) {
+      setError(e.message.includes('duplicate') ? 'Ya existe una sección con ese nombre' : e.message)
+    }
+  }
+
+  async function mover(delta) {
+    const otra = lista[pos + delta]
+    if (!otra) return
+    await Promise.all([
+      d.editar('categorias', original.id, { orden: otra.orden }),
+      d.editar('categorias', otra.id, { orden: original.orden === otra.orden ? otra.orden + delta : original.orden }),
+    ])
+    await d.recargar('categorias')
+  }
+
+  async function borrar() {
+    const total = usos.proveedores + usos.tareas + usos.ideas
+    const aviso = total > 0
+      ? `Esta sección tiene ${usos.proveedores} proveedores, ${usos.tareas} tareas y ${usos.ideas} ideas. No se borran: quedan "sin categoría". ¿Borrar la sección?`
+      : '¿Borrar esta sección?'
+    if (!confirm(aviso)) return
+    await d.borrar('categorias', original.id)
+    await Promise.all([d.recargar('proveedores'), d.recargar('tareas'), d.recargar('ideas')])
+    onCerrar()
+  }
+
+  return (
+    <Sheet abierto onCerrar={onCerrar} titulo={original ? 'Editar sección' : 'Nueva sección'}>
+      <Campo label="Nombre"><input value={f.nombre} onChange={(e) => set('nombre')(e.target.value)} placeholder="Ej. Pastel" autoFocus={!original} /></Campo>
+      <Campo label="Ícono">
+        <div className="emojis">
+          {EMOJIS.map((e) => (
+            <button key={e} className={f.emoji === e ? 'on' : ''} onClick={() => set('emoji')(e)}>{e}</button>
+          ))}
+        </div>
+      </Campo>
+      <Campo label="Presupuesto (US$)">
+        <input type="number" inputMode="decimal" value={f.presupuesto} onChange={(e) => set('presupuesto')(e.target.value)} placeholder="0" />
+      </Campo>
+      {error && <div className="aviso error">{error}</div>}
+      <button className="btn grande" onClick={guardar}>Guardar</button>
+      {original && (
+        <>
+          <div className="acciones">
+            <button className="btn secundario" disabled={pos <= 0} onClick={() => mover(-1)}>↑ Subir</button>
+            <button className="btn secundario" disabled={pos >= lista.length - 1} onClick={() => mover(1)}>↓ Bajar</button>
+          </div>
+          <button className="enlace rojo" onClick={borrar}>Borrar sección</button>
+        </>
+      )}
+    </Sheet>
   )
 }
 

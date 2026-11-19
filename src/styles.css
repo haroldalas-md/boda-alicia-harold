@@ -186,3 +186,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--celeste); b
   border-radius: 99px; padding: 6px 12px; font-size: .85rem; font-weight: 700; cursor: pointer; backdrop-filter: blur(6px); }
 .portada.vacia .portada-boton { position: static; }
 @media (min-width: 520px) { .portada { height: 340px; } }
+
+.cat-boton { width: 100%; border: 0; text-align: left; }
+.azul-txt { color: var(--azul); }
+.emojis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+.emojis button { border: 1px solid var(--linea); background: #fff; border-radius: 10px; font-size: 1.3rem; padding: 6px 0; }
+.emojis button.on { border-color: var(--azul); background: var(--celeste-suave); }
