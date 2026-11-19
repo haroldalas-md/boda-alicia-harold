@@ -73,21 +73,36 @@ export default function Invitacion({ token }) {
 
   return (
     <div className="inv">
-      <header className="inv-portada">
-        <p className="inv-pre">Nos casamos</p>
-        <h1>Alicia <span>&</span> Harold</h1>
-        <p className="inv-fecha">Sábado 24 de abril de 2027</p>
-        {dias > 0 && <p className="inv-cuenta">Faltan <b>{dias}</b> días</p>}
+      <header className="inv-hero">
+        <div className="inv-hero-texto">
+          <p className="inv-caps aparece d1">Nos casamos</p>
+          <p className="inv-lugar aparece d2">Casa Ávila, El Boquerón · San Salvador, El Salvador</p>
+          <h1 className="aparece d3">Alicia &amp; Harold</h1>
+          <div className="inv-linea aparece d4" />
+          <p className="inv-fecha-num aparece d4">24 · 04 · 2027</p>
+        </div>
+        <div className="inv-hero-pie aparece d5">
+          <p className="inv-para">{inv.nombre}</p>
+          <p>Reservamos <b>{personas(inv.cupos)}</b> para ustedes</p>
+          <a className="inv-bajar" href="#detalles">Ver invitación ↓</a>
+        </div>
       </header>
 
+      <div className="inv-cuerpo" id="detalles">
       <section className="inv-tarjeta inv-saludo">
-        <p className="inv-para">{inv.nombre}</p>
-        <p>Con mucho cariño reservamos <b>{personas(inv.cupos)}</b> para ustedes. Nos encantaría que nos acompañen en este día tan especial.</p>
+        <p className="inv-caps oscuro">Con mucho cariño</p>
+        <p className="inv-cita">Queremos compartir con ustedes el día más especial de nuestras vidas. Nos encantaría que nos acompañen.</p>
+        {dias > 0 && (
+          <div className="inv-cuenta-boxes">
+            <div><b>{dias}</b><span>días</span></div>
+            <div><b>{Math.floor(dias / 7)}</b><span>semanas</span></div>
+          </div>
+        )}
       </section>
 
       <section className="inv-tarjeta">
         <h2>Cuándo y dónde</h2>
-        <div className="inv-dato"><span>📅</span><div><b>24 de abril de 2027</b>{cfg.inv_formato && cfg.inv_formato !== 'Por definir' && <div>{cfg.inv_formato}</div>}</div></div>
+        <div className="inv-dato"><span>📅</span><div><b>Sábado 24 de abril de 2027</b>{cfg.inv_formato && cfg.inv_formato !== 'Por definir' && <div>{cfg.inv_formato}</div>}</div></div>
         <div className="inv-dato"><span>🕰️</span><div><b>{cfg.inv_hora || 'Hora por confirmar'}</b></div></div>
         <div className="inv-dato"><span>📍</span><div><b>{cfg.inv_lugar || 'Casa Ávila, El Boquerón'}</b></div></div>
         <div className="acciones">
@@ -124,7 +139,8 @@ export default function Invitacion({ token }) {
         )}
       </section>
 
-      <p className="inv-pie">Con amor, Alicia & Harold 💙</p>
+      <p className="inv-pie">Con amor,<br /><span>Alicia &amp; Harold</span></p>
+      </div>
     </div>
   )
 }
