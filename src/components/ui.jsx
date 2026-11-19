@@ -90,3 +90,18 @@ export function Icono({ nombre }) {
     </svg>
   )
 }
+
+// Barra de dos tramos: pagado (fuerte) + contratado sin pagar (suave), sobre el total
+export function BarraDoble({ pagado, contratado, total, alerta }) {
+  const base = Math.max(total, contratado, 1)
+  const pctPag = Math.min(100, (pagado / base) * 100)
+  const pctCon = Math.min(100 - pctPag, (Math.max(0, contratado - pagado) / base) * 100)
+  return (
+    <div className="barra">
+      <div className="barra-doble">
+        <div className="tramo pagado" style={{ width: `${pctPag}%` }} />
+        <div className={`tramo contratado ${alerta ? 'alerta' : ''}`} style={{ width: `${pctCon}%` }} />
+      </div>
+    </div>
+  )
+}

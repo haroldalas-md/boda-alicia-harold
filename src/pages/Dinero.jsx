@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDatos, resumenDinero } from '../lib/data'
 import { dinero, fechaCorta, fechaLarga, hoyISO, mesesHasta } from '../lib/format'
 import { subirArchivo, urlFirmada } from '../lib/files'
-import { Barra, Campo, Chips, SelectCategoria, Sheet, Vacio } from '../components/ui'
+import { Barra, BarraDoble, Campo, Chips, SelectCategoria, Sheet, Vacio } from '../components/ui'
 
 export default function Dinero() {
   const d = useDatos()
@@ -40,6 +40,27 @@ export default function Dinero() {
   )
 }
 
+export function MiParte({ r, compacta }) {
+  if (compacta) return r.faltaHarold > 0
+    ? <p className="detalle">Te falta pagar a ti: <b>{dinero(r.faltaHarold)}</b></p> : null
+  return (
+    <div className="tarjeta">
+      <div className="fila-entre"><h3>Te falta pagar a ti</h3><b className="azul-txt">{dinero(r.faltaHarold)}</b></div>
+      {r.deHarold.length === 0 ? <p className="detalle">Nada pendiente de tu parte 🎉</p> : (
+        <ul className="mini-lista">
+          {r.deHarold.map((p) => (
+            <li key={p.id}>
+              <span>{p.concepto}{p.responsable === 'Ambos' && <small className="meta"> · mitad</small>}</span>
+              <span><b>{dinero(p.miParte)}</b>{p.fecha_limite ? ` · ${fechaCorta(p.fecha_limite)}` : ''}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="ayuda">Incluye lo que te toca a ti y la mitad de lo que pagan entre los dos. Solo tú ves esto.</p>
+    </div>
+  )
+}
+
 function Dona({ partes, total, centro, sub }) {
   const R = 70, C = 2 * Math.PI * R
   let acumulado = 0
@@ -62,6 +83,7 @@ function Dona({ partes, total, centro, sub }) {
 }
 
 function Resumen({ r }) {
+  const { yo } = useDatos()
   const cubierto = Math.min(Math.max(r.saldoAhorro, 0), r.falta)
   const porJuntar = Math.max(0, r.falta - cubierto)
   const pct = r.comprometido > 0 ? Math.round((r.pagado / r.comprometido) * 100) : 0
@@ -107,7 +129,8 @@ function Resumen({ r }) {
           </ul>
         </div>
       )}
-      <div className="tarjeta">
+      {yo === 'Harold' && <MiParte r={r} />}
+      {yo === 'Harold' && <div className="tarjeta">
         <h3>¿Quién ha puesto qué?</h3>
         {[
           ['🤵 Harold (directo)', r.porOrigen.Harold],
@@ -120,7 +143,7 @@ function Resumen({ r }) {
           </div>
         ))}
         <p className="ayuda">Abonos al ahorro: Harold {dinero(r.abonosPor.Harold)} · Alicia {dinero(r.abonosPor.Alicia)} · juntos {dinero(r.abonosPor.Juntos)}</p>
-      </div>
+      </div>}
     </>
   )
 }
@@ -139,7 +162,7 @@ function Proveedores({ r, abrir }) {
         return (
           <button key={p.id} className="tarjeta prov" onClick={() => abrir(p)}>
             <div className="fila-entre">
-              <div><b>{cat?.emoji} {p.concepto}</b><div className="meta">{p.nombre}</div></div>
+              <div><b>{cat?.emoji} {p.concepto}</b><div className="meta">{p.nombre}{p.nombre ? ' · ' : ''}Paga: {p.responsable === 'Ambos' ? 'los dos' : p.responsable}</div></div>
               <div className="derecha"><b>{dinero(p.costo_total)}</b><div className={`meta ${p.falta === 0 ? 'verde' : ''}`}>{p.falta === 0 ? 'Pagado ✓' : `Falta ${dinero(p.falta)}`}</div></div>
             </div>
             <Barra valor={p.pagado} total={Number(p.costo_total)} />
@@ -176,7 +199,9 @@ function Presupuesto({ r }) {
       <div className="tarjeta">
         <div className="fila-entre"><span>Presupuesto total</span><b>{dinero(r.presupuestoTotal)}</b></div>
         <div className="fila-entre"><span>Contratado</span><b>{dinero(totalComp)}</b></div>
-        <Barra valor={totalComp} total={r.presupuestoTotal} alerta={totalComp > r.presupuestoTotal} />
+        <div className="fila-entre"><span>Ya pagado</span><b>{dinero(r.pagado)}</b></div>
+        <BarraDoble pagado={r.pagado} contratado={totalComp} total={r.presupuestoTotal} alerta={totalComp > r.presupuestoTotal} />
+        <div className="leyenda-mini"><span><i className="pagado" />Pagado</span><span><i className="contratado" />Contratado sin pagar</span><span><i />Libre</span></div>
         <p className="ayuda">Toca una sección para cambiar su nombre, ícono o monto, moverla o borrarla.</p>
       </div>
       <ul className="lista">
@@ -187,9 +212,11 @@ function Presupuesto({ r }) {
                 <span>{c.emoji} {c.nombre}</span>
                 <b className="azul-txt">{dinero(c.presupuesto)}</b>
               </div>
-              <Barra valor={c.comprometido} total={Number(c.presupuesto)} alerta={c.excedido} />
+              <BarraDoble pagado={c.pagado} contratado={c.comprometido} total={Number(c.presupuesto)} alerta={c.excedido} />
               <div className="meta">
-                {c.comprometido > 0 ? <>Contratado {dinero(c.comprometido)} · pagado {dinero(c.pagado)}</> : 'Sin contratar'}
+                {c.comprometido > 0
+                  ? <>Pagado {dinero(c.pagado)} de {dinero(c.comprometido)}{c.comprometido - c.pagado > 0 ? ` · faltan ${dinero(c.comprometido - c.pagado)}` : ' ✓'}</>
+                  : 'Sin contratar'}
                 {c.excedido && <b className="rojo"> · se pasa por {dinero(c.comprometido - c.presupuesto)}</b>}
               </div>
             </button>
@@ -399,7 +426,7 @@ function EditarProveedor({ id, onCerrar, onPagar }) {
   const d = useDatos()
   const original = id ? d.proveedores.find((p) => p.id === id) : null
   const [f, setF] = useState(() => original || {
-    concepto: '', nombre: '', contacto: '', categoria_id: null, costo_total: '', fecha_limite: '', estado: 'cotizando', notas: '',
+    concepto: '', nombre: '', contacto: '', categoria_id: null, costo_total: '', fecha_limite: '', estado: 'cotizando', notas: '', responsable: 'Ambos',
   })
   const [doc, setDoc] = useState(null)
   const [error, setError] = useState(null)
@@ -414,7 +441,7 @@ function EditarProveedor({ id, onCerrar, onPagar }) {
       const fila = {
         concepto: f.concepto.trim(), nombre: f.nombre || null, contacto: f.contacto || null,
         categoria_id: f.categoria_id, costo_total: Number(f.costo_total) || 0,
-        fecha_limite: f.fecha_limite || null, estado: f.estado, notas: f.notas || null, documento_path,
+        fecha_limite: f.fecha_limite || null, estado: f.estado, notas: f.notas || null, documento_path, responsable: f.responsable || 'Ambos',
       }
       if (original) await d.editar('proveedores', original.id, fila)
       else await d.crear('proveedores', fila)
@@ -429,6 +456,11 @@ function EditarProveedor({ id, onCerrar, onPagar }) {
       <Campo label="Estado">
         <Chips valor={f.estado} onCambio={set('estado')} opciones={[
           { valor: 'cotizando', label: 'Cotizando' }, { valor: 'contratado', label: 'Contratado' }, { valor: 'descartado', label: 'Descartado' },
+        ]} />
+      </Campo>
+      <Campo label="¿Quién lo paga?">
+        <Chips valor={f.responsable || 'Ambos'} onCambio={set('responsable')} opciones={[
+          { valor: 'Harold', label: '🤵 Harold' }, { valor: 'Alicia', label: '👰 Alicia' }, { valor: 'Ambos', label: '💑 Los dos' },
         ]} />
       </Campo>
       <Campo label="Concepto"><input value={f.concepto} onChange={(e) => set('concepto')(e.target.value)} placeholder="Ej. DJ" /></Campo>

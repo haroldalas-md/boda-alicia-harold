@@ -289,3 +289,12 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--celeste); b
 .leyenda div { display: flex; flex-direction: column; font-size: .85rem; color: var(--gris); }
 .leyenda b { font-size: 1.05rem; color: var(--tinta); }
 .barra-apilada { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: #E3EBF2; }
+
+.barra-doble { display: flex; height: 100%; }
+.tramo.pagado { background: var(--azul); }
+.tramo.contratado { background: #B9DAF0; }
+.tramo.contratado.alerta { background: #F2B8B3; }
+.leyenda-mini { display: flex; gap: 12px; flex-wrap: wrap; font-size: .75rem; color: var(--gris); }
+.leyenda-mini i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; background: var(--celeste-suave); vertical-align: -1px; }
+.leyenda-mini i.pagado { background: var(--azul); }
+.leyenda-mini i.contratado { background: #B9DAF0; }

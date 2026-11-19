@@ -1,5 +1,6 @@
 import { useDatos, resumenDinero } from '../lib/data'
 import { FECHA_BODA, diasHasta, dinero, fechaCorta, hoyISO } from '../lib/format'
+import { MiParte } from './Dinero'
 import { versiculoDeHoy, mensajeParaAlicia } from '../lib/versiculos'
 import { useEffect, useState } from 'react'
 import { Barra, Img } from '../components/ui'
@@ -136,6 +137,7 @@ export default function Inicio({ ir }) {
           <div><span className="et">Falta</span><b>{dinero(r.falta)}</b></div>
         </div>
         <Barra valor={r.pagado} total={r.comprometido} />
+        {d.yo === 'Harold' && <MiParte r={r} compacta />}
         {r.proximo && (
           <p className="detalle">Próximo: <b>{r.proximo.concepto}</b> · {dinero(r.proximo.falta)} antes del {fechaCorta(r.proximo.fecha_limite)}</p>
         )}

@@ -112,7 +112,14 @@ export function resumenDinero({ proveedores, pagos, ahorro_movimientos, categori
     return { ...c, comprometido: comp, pagado: pag, excedido: comp > Number(c.presupuesto) && Number(c.presupuesto) > 0 }
   })
 
+  // Lo que le toca pagar a Harold: lo suyo completo + la mitad de lo compartido
+  const deHarold = lista
+    .filter((p) => p.falta > 0 && (p.responsable === 'Harold' || p.responsable === 'Ambos'))
+    .map((p) => ({ ...p, miParte: p.responsable === 'Ambos' ? p.falta / 2 : p.falta }))
+  const faltaHarold = deHarold.reduce((s, p) => s + p.miParte, 0)
+
   return {
+    deHarold, faltaHarold,
     lista, comprometido, pagado, falta, saldoAhorro, abonos, porOrigen, abonosPor,
     pendientes, proximo: pendientes[0] ?? null, presupuestoTotal, porCategoria,
   }
